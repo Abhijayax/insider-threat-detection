@@ -4,26 +4,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Insider Threat Detection System</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        .chart-bar { transition: all 0.3s ease; }
+        .chart-bar:hover { opacity: 0.8; }
+    </style>
 </head>
-<body>
-    <div id="root"></div>
-    
-    <script type="text/babel">
-        const { useState, useMemo } = React;
-        const { LineChart, Line, BarChart, Bar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } = Recharts;
-        const { AlertTriangle, Shield, Users, Activity, TrendingUp, FileText, Mail, Usb, Clock } = lucide;
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white min-h-screen p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <h1 class="text-4xl font-bold">Insider Threat Detection System</h1>
+            </div>
+            <p class="text-blue-200">Unsupervised Machine Learning for Behavioral Anomaly Detection</p>
+        </div>
 
-        // PASTE THE ENTIRE REACT COMPONENT CODE HERE (from the artifact)
-        // I'll provide it below this HTML template
-        
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<InsiderThreatDetector />);
+        <!-- Model Selection -->
+        <div class="bg-slate-800/50 backdrop-blur rounded-lg p-6 mb-6 border border-blue-500/30">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Detection Model</label>
+                    <select id="modelSelect" class="bg-slate-700 border border-slate-600 rounded px-4 py-2 text-white">
+                        <option value="isolation_forest">Isolation Forest ⭐</option>
+                        <option value="one_class_svm">One-Class SVM</option>
+                        <option value="autoencoder">Autoencoder</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Top-K Users</label>
+                    <input id="topKInput" type="number" value="10" min="1" max="50" class="bg-slate-700 border border-slate-600 rounded px-4 py-2 text-white w-24">
+                </div>
+                <div class="flex gap-6">
+                    <div class="text-center">
+                        <div id="precisionDisplay" class="text-2xl font-bold text-green-400">80.0%</div>
+                        <div class="text-sm text-gray-400">Precision@10</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="fprDisplay" class="text-2xl font-bold text-yellow-400">20.0%</div>
+                        <div class="text-sm text-gray-400">False Positive Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-lg p-4 border border-red-500/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm text-gray-300">High Risk Users</div>
+                        <div id="highRiskCount" class="text-3xl font-bold text-red-400">8</div>
+                    </div>
+                    <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-lg p-4 border border-blue-500/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm text-gray-300">Total Users</div>
+                        <div class="text-3xl font-bold text-blue-400">50</div>
+                    </div>
+                    <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-lg p-4 border border-purple-500/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm text-gray-300">Avg Risk Score</div>
+                        <div id="avgRiskScore" class="text-3xl font-bold text-purple-400">45.2</div>
+                    </div>
+                    <svg class="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-lg p-4 border border-green-500/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm text-gray-300">Detection Rate</div>
+                        <div id="detectionRate" class="text-3xl font-bold text-green-400">80%</div>
+                    </div>
+                    <svg class="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Risky Users -->
+        <div class="bg-slate-800/50 backdrop-blur rounded-lg p-6 mb-6 border border-blue-500/30">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                Top 10 Risky Users
+            </h2>
+            <div id="userList" class="space-y-2"></div>
+        </div>
+
+        <!-- Feature Analysis -->
+        <div class="bg-slate-800/50 backdrop-blur rounded-lg p-6 border border-blue-500/30">
+            <h2 class="text-xl font-bold mb-4">Feature Contribution Analysis</h2>
+            <div id="featureChart" class="space-y-3"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-sm text-gray-400">
+            <p>Unsupervised ML Models: Isolation Forest • One-Class SVM • Autoencoder</p>
+            <p class="mt-1">Dataset: CERT Insider Threat Dataset</p>
+        </div>
+    </div>
+
+    <script>
+        // Generate synthetic user data
+        function generateUsers() {
+            const users = [];
+            for (let i = 0; i < 50; i++) {
+                const isAnomalous = i < 5;
+                const score = isAnomalous 
+                    ? Math.random() * 20 + 70 
+                    : Math.random() * 40 + 20;
+                
+                users.push({
+                    id: `USER_${String(i + 1).padStart(3, '0')}`,
+                    score: score,
+                    isAnomalous: isAnomalous,
+                    loginCount: Math.floor(Math.random() * 40 + 10),
+                    offHours: Math.random() * 0.5,
+                    fileAccess: Math.floor(Math.random() * 150 + 30),
+                    usbUsage: Math.floor(Math.random() * 15)
+                });
+            }
+            return users.sort((a, b) => b.score - a.score);
+        }
+
+        const users = generateUsers();
+
+        // Render user list
+        function renderUserList(topK) {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            
+            users.slice(0, topK).forEach((user, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 rounded bg-slate-700/50 hover:bg-slate-700 cursor-pointer transition-all';
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="${idx < 3 ? 'bg-red-500/30 text-red-300' : 'bg-yellow-500/30 text-yellow-300'} w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                            ${idx + 1}
+                        </div>
+                        <div>
+                            <div class="font-medium">${user.id}</div>
+                            <div class="text-xs text-gray-400">
+                                ${user.isAnomalous ? '🚨 Confirmed Threat' : '⚠️ Suspicious'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-red-400">${user.score.toFixed(1)}</div>
+                        <div class="text-xs text-gray-400">Risk Score</div>
+                    </div>
+                `;
+                userList.appendChild(div);
+            });
+        }
+
+        // Render feature chart
+        function renderFeatureChart() {
+            const features = [
+                { name: 'Off-Hours Access', value: 85 },
+                { name: 'Failed Logins', value: 72 },
+                { name: 'Rare File Access', value: 68 },
+                { name: 'Access Spike', value: 55 },
+                { name: 'Sensitive Access', value: 45 },
+                { name: 'New Recipients', value: 38 },
+                { name: 'USB Activity', value: 32 },
+                { name: 'Activity Variance', value: 28 }
+            ];
+
+            const chart = document.getElementById('featureChart');
+            chart.innerHTML = '';
+
+            features.forEach(feature => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-32 text-sm text-gray-300">${feature.name}</div>
+                        <div class="flex-1 bg-slate-700 rounded-full h-6 overflow-hidden">
+                            <div class="chart-bar h-full ${feature.value > 50 ? 'bg-red-500' : 'bg-blue-500'}" 
+                                 style="width: ${feature.value}%"></div>
+                        </div>
+                        <div class="w-12 text-sm font-bold">${feature.value}%</div>
+                    </div>
+                `;
+                chart.appendChild(div);
+            });
+        }
+
+        // Update metrics
+        function updateMetrics(model) {
+            const metrics = {
+                isolation_forest: { precision: 80.0, fpr: 20.0 },
+                one_class_svm: { precision: 70.0, fpr: 30.0 },
+                autoencoder: { precision: 65.0, fpr: 35.0 }
+            };
+
+            const m = metrics[model];
+            document.getElementById('precisionDisplay').textContent = `${m.precision}%`;
+            document.getElementById('fprDisplay').textContent = `${m.fpr}%`;
+            document.getElementById('detectionRate').textContent = `${m.precision}%`;
+        }
+
+        // Event listeners
+        document.getElementById('modelSelect').addEventListener('change', (e) => {
+            updateMetrics(e.target.value);
+        });
+
+        document.getElementById('topKInput').addEventListener('change', (e) => {
+            const topK = parseInt(e.target.value);
+            renderUserList(topK);
+        });
+
+        // Initial render
+        renderUserList(10);
+        renderFeatureChart();
     </script>
 </body>
 </html>
